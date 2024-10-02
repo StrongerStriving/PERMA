@@ -8,7 +8,6 @@
     <style>
         :root {
             --primary-color: #4a90e2;
-            --secondary-color: #f5a623;
             --background-color: #f0f4f8;
             --text-color: #333;
         }
@@ -20,6 +19,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            box-sizing: border-box;
         }
         h1, h2, h3 {
             color: var(--primary-color);
@@ -30,6 +30,7 @@
             margin: 5px 0 20px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            box-sizing: border-box;
         }
         button {
             background-color: var(--primary-color);
@@ -64,19 +65,18 @@
             margin-top: 10px;
         }
         .option {
+            flex: 1;
             text-align: center;
+            margin: 0 2px;
         }
         .option input[type="radio"] {
             display: none;
         }
         .option label {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            line-height: 30px;
-            border: 2px solid var(--primary-color);
-            border-radius: 50%;
+            display: block;
+            padding: 5px 0;
+            border: 1px solid var(--primary-color);
+            background-color: rgba(74, 144, 226, 0.1);
             color: var(--primary-color);
             cursor: pointer;
             transition: all 0.3s;
@@ -92,12 +92,20 @@
             padding: 15px;
             margin-top: 20px;
         }
-        #chart {
+        #chart-container {
             margin-top: 20px;
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 15px;
+            height: 400px;
+        }
+        
+        @media (max-width: 600px) {
+            .option label {
+                font-size: 12px;
+                padding: 3px 0;
+            }
         }
     </style>
 </head>
@@ -130,7 +138,9 @@
     <button onclick="clearData()" style="background-color: #e74c3c;">Xóa dữ liệu</button>
 
     <div id="results"></div>
-    <canvas id="chart"></canvas>
+    <div id="chart-container">
+        <canvas id="chart"></canvas>
+    </div>
 
     <script>
         const questions = [
@@ -164,7 +174,7 @@
                             ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => `
                                 <div class="option">
                                     <input type="radio" id="q${index}_${value}" name="q${index}" value="${value}">
-                                    <label for="q${index}_${value}">${value}</label>
+                                    <label for="q${index}_${value}" style="background-color: rgba(74, 144, 226, ${value / 10});">${value}</label>
                                 </div>
                             `).join('')}
                         </div>
@@ -259,10 +269,15 @@
                     }]
                 },
                 options: {
-                    scale: {
-                        ticks: {
-                            beginAtZero: true,
-                            max: 10
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
                         }
                     }
                 }
