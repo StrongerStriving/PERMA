@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERMA Profiler Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --background-color: #f0f4f8;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 10px 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #357abd;
+        }
+        .legend {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .question {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .option {
+            text-align: center;
+        }
+        .option input[type="radio"] {
+            display: none;
+        }
+        .option label {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option input[type="radio"]:checked + label {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #results {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        #chart {
+            margin-top: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PERMA Profiler Test (Phiên bản tiếng Việt)</h1>
+    
+    <div>
+        <label for="name">Họ tên:</label>
+        <input type="text" id="name" placeholder="Nhập họ tên của bạn">
+    </div>
+    <div>
+        <label for="pid">PID:</label>
+        <input type="text" id="pid" placeholder="Nhập PID của bạn">
+    </div>
+    <div>
+        <label for="date">Ngày làm test:</label>
+        <input type="date" id="date">
+    </div>
+
+    <h2>Bảng câu hỏi PERMA Profiler</h2>
+    
+    <div class="legend">
+        <h3>Hãy trả lời các câu hỏi sau dựa trên cảm nhận của bạn trong 4 tuần qua:</h3>
+        <p>Thang điểm từ 0 (không bao giờ) đến 10 (luôn luôn)</p>
+    </div>
+
+    <div id="questions"></div>
+
+    <button onclick="calculateScore()">Tính điểm</button>
+    <button onclick="clearData()" style="background-color: #e74c3c;">Xóa dữ liệu</button>
+
+    <div id="results"></div>
+    <canvas id="chart"></canvas>
+
+    <script>
+        const questions = [
+            "Bạn cảm thấy hài lòng với cuộc sống của mình đến mức nào?",
+            "Bạn cảm thấy gắn kết và hứng thú với những việc bạn làm đến mức nào?",
+            "Nhìn chung, bạn cảm thấy gần gũi với những người xung quanh đến mức nào?",
+            "Nhìn chung, bạn cảm thấy cuộc sống của mình có ý nghĩa và mục đích đến mức nào?",
+            "Bạn có thường xuyên đạt được những mục tiêu quan trọng mà bạn đặt ra cho bản thân không?",
+            "Bạn có thường xuyên cảm thấy vui vẻ không?",
+            "Bạn có thường xuyên cảm thấy lo lắng không?",
+            "Bạn có thường xuyên cảm thấy tức giận không?",
+            "Bạn có thường xuyên cảm thấy buồn chán không?",
+            "Sức khỏe của bạn như thế nào?",
+            "Bạn cảm thấy cô đơn đến mức nào?",
+            "Bạn có cảm thấy được tôn trọng không?",
+            "Bạn có cảm thấy mình đang tiến bộ trong việc đạt được các mục tiêu quan trọng không?",
+            "Bạn có thường xuyên mất tập trung vào những việc bạn đang làm không?",
+            "Bạn có thường xuyên cảm thấy yêu thương, được yêu thương không?",
+            "Nhìn chung, bạn cảm thấy mình có bao nhiêu thời gian tự do để làm những việc bạn thích?"
+        ];
+
+        let chart;
+
+        function initQuestions() {
+            const questionsDiv = document.getElementById('questions');
+            questions.forEach((q, index) => {
+                questionsDiv.innerHTML += `
+                    <div class="question">
+                        <p><strong>${index + 1}.</strong> ${q}</p>
+                        <div class="options">
+                            ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => `
+                                <div class="option">
+                                    <input type="radio" id="q${index}_${value}" name="q${index}" value="${value}">
+                                    <label for="q${index}_${value}">${value}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function calculateScore() {
+            let scores = {
+                P: 0, // Positive Emotion
+                E: 0, // Engagement
+                R: 0, // Relationships
+                M: 0, // Meaning
+                A: 0, // Accomplishment
+                H: 0, // Health
+                N: 0, // Negative Emotion
+                Lon: 0 // Loneliness
+            };
+
+            // PERMA scoring
+            scores.P = (getScore(0) + getScore(5)) / 2;
+            scores.E = (getScore(1) + getScore(13)) / 2;
+            scores.R = (getScore(2) + getScore(14)) / 2;
+            scores.M = (getScore(3) + getScore(11)) / 2;
+            scores.A = (getScore(4) + getScore(12)) / 2;
+
+            // Additional scores
+            scores.H = getScore(9);
+            scores.N = (getScore(6) + getScore(7) + getScore(8)) / 3;
+            scores.Lon = getScore(10);
+
+            const results = {
+                date: document.getElementById('date').value,
+                name: document.getElementById('name').value,
+                pid: document.getElementById('pid').value,
+                scores: scores
+            };
+
+            displayResults(results);
+            saveResults(results);
+            updateChart(results);
+        }
+
+        function getScore(index) {
+            const selectedOption = document.querySelector(`input[name="q${index}"]:checked`);
+            return selectedOption ? parseInt(selectedOption.value) : 0;
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h3>Kết quả PERMA Profiler:</h3>
+                <p><strong>Cảm xúc tích cực (P):</strong> ${results.scores.P.toFixed(2)}</p>
+                <p><strong>Sự gắn kết (E):</strong> ${results.scores.E.toFixed(2)}</p>
+                <p><strong>Mối quan hệ (R):</strong> ${results.scores.R.toFixed(2)}</p>
+                <p><strong>Ý nghĩa (M):</strong> ${results.scores.M.toFixed(2)}</p>
+                <p><strong>Thành tựu (A):</strong> ${results.scores.A.toFixed(2)}</p>
+                <p><strong>Sức khỏe (H):</strong> ${results.scores.H.toFixed(2)}</p>
+                <p><strong>Cảm xúc tiêu cực (N):</strong> ${results.scores.N.toFixed(2)}</p>
+                <p><strong>Cô đơn (Lon):</strong> ${results.scores.Lon.toFixed(2)}</p>
+                <p><strong>Điểm PERMA tổng hợp:</strong> ${((results.scores.P + results.scores.E + results.scores.R + results.scores.M + results.scores.A) / 5).toFixed(2)}</p>
+            `;
+        }
+
+        function saveResults(results) {
+            let savedResults = JSON.parse(localStorage.getItem('permaResults')) || [];
+            savedResults.push(results);
+            localStorage.setItem('permaResults', JSON.stringify(savedResults));
+        }
+
+        function updateChart(results) {
+            const ctx = document.getElementById('chart').getContext('2d');
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Cảm xúc tích cực (P)', 'Sự gắn kết (E)', 'Mối quan hệ (R)', 'Ý nghĩa (M)', 'Thành tựu (A)', 'Sức khỏe (H)', 'Cảm xúc tiêu cực (N)', 'Cô đơn (Lon)'],
+                    datasets: [{
+                        label: 'PERMA Profiler',
+                        data: [results.scores.P, results.scores.E, results.scores.R, results.scores.M, results.scores.A, results.scores.H, results.scores.N, results.scores.Lon],
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                        borderColor: 'rgba(74, 144, 226, 1)',
+                        pointBackgroundColor: 'rgba(74, 144, 226, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(74, 144, 226, 1)'
+                    }]
+                },
+                options: {
+                    scale: {
+                        ticks: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function clearData() {
+            localStorage.removeItem('permaResults');
+            document.getElementById('results').innerHTML = '';
+            if (chart) {
+                chart.destroy();
+            }
+            document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+        }
+
+        initQuestions();
+    </script>
+</body>
+</html>
