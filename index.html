@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PERMA Profiler Test</title>
+    <title>PERMA Profiler</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -136,13 +136,13 @@
     </style>
 </head>
 <body>
-    <h1>PERMA Profiler Test</h1>
+    <h1>PERMA Profiler</h1>
     <p>Phiên bản tiếng Việt được phát triển bởi Trung tâm Chăm sóc Sức khỏe Tinh thần Tích hợp Vinmec</p>
     <p>PERMA Profiler là một công cụ đánh giá sức khỏe tinh thần và hạnh phúc dựa trên lý thuyết PERMA của Martin Seligma, một nhà tâm lý học nổi tiếng trong lĩnh vực tâm lý học tích cực.</p>
     <p>Thang đo có 15 câu hỏi, có thể được hoàn thành chỉ trong 5 phút. Chúng ta hãy cùng làm thử nghen ^^ </p>
     <p> Sau khi hoàn thành bài test, chúng tôi sẽ có bản phân tích đánh giá chi tiết, bạn có thể thoải mái chia sẻ với bạn bè, người thân, đồng nghiệp và... sếp của mình :)".</p>
-   
-<div>
+
+    <div>
         <label for="name">Họ tên:</label>
         <input type="text" id="name" placeholder="Nhập họ tên của bạn">
     </div>
@@ -151,7 +151,7 @@
         <input type="date" id="date">
     </div>
 
-     <div class="legend">
+    <div class="legend">
         <h3>Hãy trả lời các câu hỏi sau dựa trên cảm nhận của bạn:</h3>
     </div>
 
@@ -166,32 +166,27 @@
 
     <script>
         const questions = [
-            "1Bạn thường cảm thấy mình đang tiến bộ trong việc đạt được các mục tiêu đến mức nào?",
-            "2Bạn có thường xuyên bị cuốn hút vào những việc bạn làm không?",
-            "3Nhìn chung, bạn có thường xuyên cảm thấy vui vẻ không?",
-            "5Bạn có thường xuyên đạt được các mục tiêu quan trọng mà bạn đặt ra cho bản thân không?",
-            
-            "7Nhìn chung, bạn có cảm thấy cuộc sống của mình có ý nghĩa và mục đích đến mức nào?",
-            
-            "9Nhìn chung, bạn cảm thấy những gì mình làm trong cuộc sống là có giá trị và đáng giá đến mức nào?",
-            "10Nhìn chung, bạn cảm thấy hào hứng và quan tâm đến mọi thứ đến mức nào?",
-            
-            "13Nhìn chung, bạn có thường xuyên cảm thấy tích cực không?",
-           
-            "15Bạn có thường xuyên có thể xử lý các trách nhiệm của mình không?",
-          
-            "17Bạn có thường xuyên mất khái niệm về thời gian khi làm điều gì đó bạn thích không?",
-            
-            "19Bạn cảm thấy được yêu thương đến mức nào?",
-            "20Bạn cảm thấy mình có định hướng trong cuộc sống đến mức nào?",
-            "21Bạn hài lòng với các mối quan hệ cá nhân của mình đến mức nào?",
-            "22Nhìn chung, bạn mãn nguyện với cuộc song của mìnhh đến mức nào?",
+           /*1*/ "Bạn có thường xuyên cảm thấy mình đang tiến gần hơn tới các mục tiêu của mình?",
+           /*2*/ "Bạn có thường xuyên bị cuốn hút hoặc chìm đắm vào những việc mình đang làm?",
+            /*3*/"Nhìn chung, bạn có thường xuyên cảm thấy vui vẻ không?",
+           /*4*/ "Bạn có thường xuyên đạt được các mục tiêu quan trọng mà bạn tự đặt ra cho mình?",
+        /*5*/ "Nhìn chung, bạn có sống một cuộc sống có ý nghĩa và mục đích không? (Nếu có thì ở mức độ nào?)",
+           /*6*/ "Khi bạn cần, bạn có thường nhận được sự hỗ trợ và giúp đỡ của người khác không?",
+           /*7*/ "Nhìn chung, bạn có cảm thấy những gì mình làm trong cuộc đời mình là có giá trị và xứng đáng không? (Nếu có thì ở mức độ nào?)",
+           /*8*/ "Nhìn chung, bạn có cảm thấy phấn khích và thích thú với những điều xung quanh? (Nếu có thì ở mức độ nào?)",
+           /*9*/"Nhìn chung, bạn có thường xuyên cảm thấy tích cực không?",
+           /*10*/"Bạn có thường xuyên có thể xử lý hết các trách nhiệm của mình không?",
+          /*11*/"Bạn có thường xuyên có trải nghiệm làm gì đó mình thích và quên không để ý bao nhiêu thời gian đã trôi qua?",
+            /*12*/"Bạn có cảm thấy mình đang được yêu thương không? (Nếu có thì ở mức độ nào?)",
+            /*13*/"Bạn cảm thấy mình có định hướng trong cuộc sống đến mức nào?",
+            /*14*/"Bạn hài lòng với các mối quan hệ cá nhân của mình đến mức nào?",
+            /*15*/"Nhìn chung, bạn hài lòng hoặc mãn nguyện hoặc với cuộc sống của mìnhh đến mức nào?",
                   ];
 
         const labels = [
             "Không bao giờ", "Không bao giờ", "Không bao giờ", "Không bao giờ",
             
-            "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không",
+            "Hoàn toàn không", "Không bao giờ", "Hoàn toàn không", "Hoàn toàn không",
             "Không bao giờ", "Không bao giờ", "Không bao giờ",
             
             "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không", 
@@ -200,10 +195,10 @@
         const rightLabels = [
             "Luôn luôn", "Luôn luôn", "Luôn luôn", "Luôn luôn",
             
-            "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có",
+            "Hoàn toàn có", "Luôn luôn", "Hoàn toàn có", "Hoàn toàn có",
             "Luôn luôn", "Luôn luôn", "Luôn luôn",
             
-            "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có", 
+            "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn hài lòng", "Hoàn toàn hài lòng", 
         ];
 
         let chart;
@@ -243,11 +238,11 @@
             };
 
             // PERMA scoring based on provided questions
-            scores.A = (getScore(0) + getScore(4) + getScore(14)) / 3;
-            scores.E = (getScore(1) + getScore(9) + getScore(16)) / 3;
-            scores.P = (getScore(2) + getScore(12) + getScore(21)) / 3;
-            scores.M = (getScore(6) + getScore(8) + getScore(19)) / 3;
-            scores.R = (getScore(7) + getScore(18) + getScore(20)) / 3;
+            scores.A = (getScore(0) + getScore(3) + getScore(9)) / 3;
+            scores.E = (getScore(1) + getScore(7) + getScore(10)) / 3;
+            scores.P = (getScore(2) + getScore(8) + getScore(14)) / 3;
+            scores.M = (getScore(4) + getScore(6) + getScore(12)) / 3;
+            scores.R = (getScore(5) + getScore(11) + getScore(13)) / 3;
     
 
             const results = {
