@@ -24,6 +24,14 @@
         h1, h2, h3 {
             color: var(--primary-color);
         }
+        h1 {
+            margin-bottom: 5px;
+        }
+        h1 + p {
+            font-style: italic;
+            color: #555;
+            margin-top: 0;
+        }
         input[type="text"], input[type="date"] {
             width: 100%;
             padding: 10px;
@@ -58,32 +66,30 @@
             border-radius: 4px;
             padding: 15px;
             margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 40px; /* Tăng chiều cao để chứa chú thích */
         }
         .options {
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
+            position: relative;
         }
         .option {
             flex: 1;
             text-align: center;
             margin: 0 2px;
-        }
-        .option input[type="radio"] {
-            display: none;
-        }
-        .option label {
-            display: block;
-            padding: 5px 0;
-            border: 1px solid var(--primary-color);
-            background-color: rgba(74, 144, 226, 0.1);
-            color: var(--primary-color);
+            border: 2px solid #ddd;
+            background-color: white;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: background-color 0.3s, border-color 0.3s;
+            border-radius: 4px;
+            padding: 5px 0;
         }
-        .option input[type="radio"]:checked + label {
+        .option.selected {
             background-color: var(--primary-color);
             color: white;
+            border-color: var(--primary-color);
         }
         #results {
             background-color: white;
@@ -105,17 +111,34 @@
             color: #e74c3c;
             font-weight: bold;
         }
+        .label {
+            position: absolute;
+            bottom: 10px; /* Đặt chú thích ở dưới cùng */
+            font-size: 0.9em;
+            color: var(--primary-color);
+            width: 100%;
+            text-align: center;
+        }
+        .label.left {
+            left: 0;
+            text-align: left;
+        }
+        .label.right {
+            right: 0;
+            text-align: right;
+        }
         
         @media (max-width: 600px) {
-            .option label {
+            .option {
                 font-size: 12px;
-                padding: 3px 0;
             }
         }
     </style>
 </head>
 <body>
-    <h1>PERMA Profiler Test (Phiên bản tiếng Việt)</h1>
+    <h1>PERMA Profiler Test</h1>
+    <p>Phiên bản tiếng Việt được phát triển bởi Trung tâm Chăm sóc Sức khỏe Tinh thần Tích hợp Vinmec</p>
+    <p>PERMA Profiler là một công cụ đánh giá sức khỏe tâm thần và hạnh phúc dựa trên lý thuyết PERMA của Martin Seligman, một nhà tâm lý học nổi tiếng trong lĩnh vực tâm lý học tích cực.</p>
     
     <div>
         <label for="name">Họ tên:</label>
@@ -129,14 +152,12 @@
     <h2>Bảng câu hỏi PERMA Profiler</h2>
     
     <div class="legend">
-        <h3>Hãy trả lời các câu hỏi sau dựa trên cảm nhận của bạn trong 4 tuần qua:</h3>
-        <p>Thang điểm từ 0 (không bao giờ) đến 10 (luôn luôn)</p>
+        <h3>Hãy trả lời các câu hỏi sau dựa trên cảm nhận của bạn:</h3>
     </div>
 
     <div id="questions"></div>
 
     <button onclick="calculateScore()">Tính điểm</button>
-    <button onclick="clearData()" style="background-color: #e74c3c;">Xóa dữ liệu</button>
 
     <div id="results"></div>
     <div id="chart-container">
@@ -145,22 +166,44 @@
 
     <script>
         const questions = [
-            "Bạn cảm thấy hài lòng với cuộc sống của mình đến mức nào?",
-            "Bạn cảm thấy gắn kết và hứng thú với những việc bạn làm đến mức nào?",
-            "Nhìn chung, bạn cảm thấy gần gũi với những người xung quanh đến mức nào?",
-            "Nhìn chung, bạn cảm thấy cuộc sống của mình có ý nghĩa và mục đích đến mức nào?",
-            "Bạn có thường xuyên đạt được những mục tiêu quan trọng mà bạn đặt ra cho bản thân không?",
-            "Bạn có thường xuyên cảm thấy vui vẻ không?",
-            "Bạn có thường xuyên cảm thấy lo lắng không?",
-            "Bạn có thường xuyên cảm thấy tức giận không?",
-            "Bạn có thường xuyên cảm thấy buồn chán không?",
-            "Sức khỏe của bạn như thế nào?",
-            "Bạn cảm thấy cô đơn đến mức nào?",
-            "Bạn có cảm thấy được tôn trọng không?",
-            "Bạn có cảm thấy mình đang tiến bộ trong việc đạt được các mục tiêu quan trọng không?",
-            "Bạn có thường xuyên mất tập trung vào những việc bạn đang làm không?",
-            "Bạn có thường xuyên cảm thấy yêu thương, được yêu thương không?",
-            "Nhìn chung, bạn cảm thấy mình có bao nhiêu thời gian tự do để làm những việc bạn thích?"
+            "1Bạn thường cảm thấy mình đang tiến bộ trong việc đạt được các mục tiêu đến mức nào?",
+            "2Bạn có thường xuyên bị cuốn hút vào những việc bạn làm không?",
+            "3Nhìn chung, bạn có thường xuyên cảm thấy vui vẻ không?",
+            "4Bạn có thường xuyên đạt được các mục tiêu quan trọng mà bạn đặt ra cho bản thân không?",
+            
+            "5Nhìn chung, bạn có cảm thấy cuộc sống của mình có ý nghĩa và mục đích đến mức nào?",
+            "6Khi cần thiết, bạn thường nhận được sự hỗ trợ và giúp đỡ của người khác đến mức nào?",
+            "7Nhìn chung, bạn cảm thấy những gì mình làm trong cuộc sống là có giá trị và đáng giá đến mức nào?",
+            "8Nhìn chung, bạn cảm thấy hào hứng và quan tâm đến mọi thứ đến mức nào?",
+            
+            "9Nhìn chung, bạn có thường xuyên cảm thấy tích cực không?",
+           
+            "10Bạn có thường xuyên có thể xử lý các trách nhiệm của mình không?",
+          
+            "11Bạn có thường xuyên mất khái niệm về thời gian khi làm điều gì đó bạn thích không?",
+            
+            "12Bạn cảm thấy được yêu thương đến mức nào?",
+            "13Bạn cảm thấy mình có định hướng trong cuộc sống đến mức nào?",
+            "14Bạn hài lòng với các mối quan hệ cá nhân của mình đến mức nào?",
+            "15Nhìn chung, bạn mãn nguyện với cuộc song của mìnhh đến mức nào?",
+                  ];
+
+        const labels = [
+            "Không bao giờ", "Không bao giờ", "Không bao giờ", "Không bao giờ",
+            
+            "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không",
+            "Không bao giờ", "Không bao giờ", "Không bao giờ",
+            
+            "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không", "Hoàn toàn không", 
+        ];
+
+        const rightLabels = [
+            "Luôn luôn", "Luôn luôn", "Luôn luôn", "Luôn luôn",
+            
+            "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có",
+            "Luôn luôn", "Luôn luôn", "Luôn luôn",
+            
+            "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có", "Hoàn toàn có", 
         ];
 
         let chart;
@@ -173,15 +216,20 @@
                         <p><strong>${index + 1}.</strong> ${q}</p>
                         <div class="options">
                             ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => `
-                                <div class="option">
-                                    <input type="radio" id="q${index}_${value}" name="q${index}" value="${value}">
-                                    <label for="q${index}_${value}" style="background-color: rgba(74, 144, 226, ${value / 10});">${value}</label>
-                                </div>
+                                <div class="option" onclick="selectOption(${index}, ${value})">${value}</div>
                             `).join('')}
                         </div>
+                        <span class="label left">${labels[index]}</span>
+                        <span class="label right">${rightLabels[index]}</span>
                     </div>
                 `;
             });
+        }
+
+        function selectOption(questionIndex, value) {
+            const options = document.querySelectorAll(`.question:nth-child(${questionIndex + 1}) .option`);
+            options.forEach(option => option.classList.remove('selected'));
+            options[value].classList.add('selected');
         }
 
         function calculateScore() {
@@ -191,23 +239,17 @@
                 R: 0, // Relationships
                 M: 0, // Meaning
                 A: 0, // Accomplishment
-                H: 0, // Health
-                N: 0, // Negative Emotion
-                Lon: 0 // Loneliness
+         
             };
 
-            // PERMA scoring
-            scores.P = (getScore(0) + getScore(5)) / 2;
-            scores.E = (getScore(1) + getScore(13)) / 2;
-            scores.R = (getScore(2) + getScore(14)) / 2;
-            scores.M = (getScore(3) + getScore(11)) / 2;
-            scores.A = (getScore(4) + getScore(12)) / 2;
+            // PERMA scoring based on provided questions
+            scores.A = (getScore(0) + getScore(3) + getScore(9)) / 3;
+            scores.E = (getScore(1) + getScore(7) + getScore(10)) / 3;
+            scores.P = (getScore(2) + getScore(8) + getScore(14)) / 3;
+            scores.M = (getScore(4) + getScore(6) + getScore(12)) / 3;
+            scores.R = (getScore(5) + getScore(11) + getScore(13)) / 3;
+    
 
-            // Additional scores
-            scores.H = getScore(9);
-            scores.N = 10-((getScore(6) + getScore(7) + getScore(8)) / 3)
-            scores.Lon = 10 - getScore(10);
-            
             const results = {
                 date: document.getElementById('date').value,
                 name: document.getElementById('name').value,
@@ -220,8 +262,8 @@
         }
 
         function getScore(index) {
-            const selectedOption = document.querySelector(`input[name="q${index}"]:checked`);
-            return selectedOption ? parseInt(selectedOption.value) : 0;
+            const selectedOption = document.querySelector(`.question:nth-child(${index + 1}) .option.selected`);
+            return selectedOption ? parseInt(selectedOption.textContent) : 0;
         }
 
         function displayResults(results) {
@@ -233,14 +275,12 @@
                 <h3>Kết quả PERMA Profiler:</h3>
                 <p><strong>Họ tên:</strong> ${results.name}</p>
                 <p><strong>Ngày làm test:</strong> ${results.date}</p>
-                <p><strong>Cảm xúc tích cực (P):</strong> ${results.scores.P.toFixed(2)}</p>
-                <p><strong>Sự gắn kết (E):</strong> ${results.scores.E.toFixed(2)}</p>
-                <p><strong>Mối quan hệ (R):</strong> ${results.scores.R.toFixed(2)}</p>
-                <p><strong>Ý nghĩa (M):</strong> ${results.scores.M.toFixed(2)}</p>
-                <p><strong>Thành tựu (A):</strong> ${results.scores.A.toFixed(2)}</p>
-                <p><strong>Sức khỏe (H):</strong> ${results.scores.H.toFixed(2)}</p>
-                <p><strong>Cảm xúc tiêu cực (đảo nghịch)(Nr):</strong> ${results.scores.N.toFixed(2)}</p>
-                <p><strong>Cô đơn (đảo nghịch)(Lonr):</strong> ${results.scores.Lon.toFixed(2)}</p>
+                <p><strong>P - Positive Emotions (Cảm xúc tích cực):</strong> ${results.scores.P.toFixed(2)}<br>Đánh giá mức độ trải nghiệm các cảm xúc tích cực như vui vẻ, hài lòng, và lạc quan trong cuộc sống hàng ngày.</p>
+                <p><strong>E - Engagement (Sự gắn kết):</strong> ${results.scores.E.toFixed(2)}<br>Đo lường mức độ tham gia và đắm chìm vào các hoạt động, công việc hoặc sở thích, tạo ra trạng thái "flow" (dòng chảy).</p>
+                <p><strong>R - Relationships (Mối quan hệ):</strong> ${results.scores.R.toFixed(2)}<br>Đánh giá chất lượng và sự hài lòng trong các mối quan hệ xã hội, bao gồm gia đình, bạn bè và đồng nghiệp.</p>
+                <p><strong>M - Meaning (Ý nghĩa):</strong> ${results.scores.M.toFixed(2)}<br>Xem xét cảm giác về mục đích và ý nghĩa trong cuộc sống, cũng như cảm giác đóng góp vào một điều gì đó lớn lao hơn bản thân.</p>
+                <p><strong>A - Accomplishment (Thành tựu):</strong> ${results.scores.A.toFixed(2)}<br>Đánh giá cảm giác về sự tiến bộ, thành công và hoàn thành mục tiêu trong cuộc sống.</p>
+                
                 <p class="highlight"><strong>Điểm PERMA tổng hợp:</strong> ${permaAverage}</p>
                 <p>${comparison}</p>
             `;
@@ -274,10 +314,10 @@
             chart = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['Cảm xúc tích cực (P)', 'Sự gắn kết (E)', 'Mối quan hệ (R)', 'Ý nghĩa (M)', 'Thành tựu (A)', 'Sức khỏe (H)', 'Cảm xúc tiêu cực reverse (N)', 'Cô đơn reverse (Lon)'],
+                    labels: ['Cảm xúc tích cực (P)', 'Sự gắn kết (E)', 'Mối quan hệ (R)', 'Ý nghĩa (M)', 'Thành tựu (A)'],
                     datasets: [{
                         label: 'Bông hoa hạnh phúc và tiềm năng trong cuộc sống',
-                        data: [results.scores.P, results.scores.E, results.scores.R, results.scores.M, results.scores.A, results.scores.H, results.scores.N, results.scores.Lon],
+                        data: [results.scores.P, results.scores.E, results.scores.R, results.scores.M, results.scores.A],
                         backgroundColor: 'rgba(74, 144, 226, 0.2)',
                         borderColor: 'rgba(74, 144, 226, 1)',
                         pointBackgroundColor: 'rgba(74, 144, 226, 1)',
@@ -296,7 +336,7 @@
                             },
                             suggestedMin: 0,
                             suggestedMax: 10
-                        }
+                        }             
                     }
                 }
             });
@@ -308,7 +348,7 @@
             if (chart) {
                 chart.destroy();
             }
-            document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.option').forEach(option => option.classList.remove('selected'));
         }
 
         initQuestions();
